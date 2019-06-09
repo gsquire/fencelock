@@ -14,6 +14,7 @@ indent.
 There are two commands implemented by this module.
 
 - `FENCELOCK.ACQUIRE $LOCK_NAME $EXPIRATION`
+
 This command takes the desired lock name as well as an expiration in seconds. Upon a successful
 acquire of the lock, it will return a secret value and a fencing token. The fencing token is
 described below in the implementation section. The secret value is used in the release command to
@@ -21,6 +22,7 @@ prevent erroneous releases by other clients. If the lock has already been acquir
 client, this command returns the Redis null bulk reply.
 
 - `FENCELOCK.RELEASE $LOCK_NAME $SECRET`
+
 This command takes the desired lock name as well as the current secret value associated with the
 lock. The secret value is returned upon a successful acquire of the lock. It will simply delete the
 lock if it has not already expired.
