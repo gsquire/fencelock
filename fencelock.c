@@ -38,23 +38,18 @@ Release_RedisCommand(RedisModuleCtx * ctx, RedisModuleString ** argv, int argc)
 		return RedisModule_WrongArity(ctx);
 	}
 	long long	value;
-	if (RedisModule_StringToLongLong(argv[2], &value) == REDISMODULE_OK) {
-		if (value != curValue) {
-			return RedisModule_ReplyWithNull(ctx);
-		} else {
-			/*
-			 * The caller supplied the correct random value, so
-			 * delete the key.
-			 */
-			RedisModuleCallReply *reply = RedisModule_Call(ctx, "DEL", "s", argv[1]);
-			RedisModule_ReplyWithCallReply(ctx, reply);
-			RedisModule_FreeCallReply(reply);
-			return REDISMODULE_OK;
-		}
-	} else {
+	if (RedisModule_StringToLongLong(argv[2], &value) == REDISMODULE_ERR) {
 		return RedisModule_ReplyWithError(ctx, REDISMODULE_ERRORMSG_WRONGTYPE);
 	}
-
+	if (value != curValue) {
+		return RedisModule_ReplyWithNull(ctx);
+	}
+	/*
+	 * The caller supplied the correct random value, so delete the key.
+	 */
+	RedisModuleCallReply *reply = RedisModule_Call(ctx, "DEL", "s", argv[1]);
+	RedisModule_ReplyWithCallReply(ctx, reply);
+	RedisModule_FreeCallReply(reply);
 	return REDISMODULE_OK;
 }
 
