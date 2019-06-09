@@ -7,4 +7,4 @@ fmt:
 
 .PHONY: clean
 clean:
-	\rm -f fencelock.so
+	\rm -f fencelock.so *.BAK
