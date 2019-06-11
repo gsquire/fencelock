@@ -1,18 +1,6 @@
 language: c
+dist: xenial
 sudo: false
-
-matrix:
-    include:
-        - os: linux
-          env:
-              - CC=gcc-7
-          addons:
-              apt:
-                  sources:
-                      - ubuntu-toolchain-r-test
-                  packages:
-                      - g++-7
-
 script:
     - make
 notifications:
