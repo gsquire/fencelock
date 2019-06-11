@@ -4,9 +4,9 @@ sudo: required
 services:
     - docker
 before_install:
-    - docker-compose build -f ci/docker-compose.yml
+    - docker-compose -f ci/docker-compose.yml build
 script:
     - make
-    - docker-compose run test -f ci/docker-compose.yml
+    - docker-compose -f ci/docker-compose.yml run test
 notifications:
     email: false
