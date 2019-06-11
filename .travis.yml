@@ -5,7 +5,6 @@ services:
     - docker
 before_install:
     - docker-compose -f ci/docker-compose.yml build
-script:
-    - ci/run.sh
+script: ci/run.sh
 notifications:
     email: false
