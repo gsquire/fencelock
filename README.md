@@ -3,7 +3,7 @@ This is a simple Redis module that implements a distributed lock with a fencing 
 in [this blog post](https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html).
 
 ## Install
-There is a simple Makefile provided that has a few targets that are described below:
+There is a Makefile provided that has a few targets that are described below:
 - `module`: This will build a shared object file that Redis can load at startup. It is the default
 target.
 - `fmt`: This will format the source code using GNU indent.
