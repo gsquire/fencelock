@@ -9,7 +9,7 @@ LOG = logging.getLogger(__name__)
 
 @pytest.fixture
 def redis_conn():
-    return redis.Redis(host='redis', port='6379')
+    return redis.Redis(host='redis', port=6379)
 
 def test_simple_acquire(redis_conn):
     data = redis_conn.execute_command('FENCELOCK.ACQUIRE a 5')
