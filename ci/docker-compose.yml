@@ -1,0 +1,12 @@
+version: "3.7"
+services:
+    test:
+        build: .
+        depends_on:
+            - redis
+    redis:
+        image: redis:5
+        command: redis-server /data/redis.conf
+        volumes:
+            - ./redis.conf:/data/redis.conf
+            - ./fencelock.so:/data/fencelock.so

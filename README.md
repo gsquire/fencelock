@@ -1,4 +1,6 @@
 # fencelock
+[![Build Status](https://travis-ci.org/gsquire/fencelock.svg?branch=master)](https://travis-ci.org/gsquire/fencelock)
+
 This is a simple Redis module that implements a distributed lock with a fencing token as described
 in [this blog post](https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html).
 
