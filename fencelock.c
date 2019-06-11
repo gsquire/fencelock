@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <time.h>
 
 #include "redismodule.h"
 
@@ -9,19 +10,28 @@ static uint32_t	curValue = 0;
 int
 Acquire_RedisCommand(RedisModuleCtx * ctx, RedisModuleString ** argv, int argc)
 {
+	const int	MILLIS = 1000;
+
 	if (argc != 3) {
 		return RedisModule_WrongArity(ctx);
 	}
-	uint32_t	value = arc4random();
+	RedisModule_AutoMemory(ctx);
 
-	RedisModuleCallReply *reply =
-	RedisModule_Call(ctx, "SET", "slccs", argv[1], value, "NX", "EX", argv[2]);
+	int		value = rand();
+
+	RedisModuleKey *key = RedisModule_OpenKey(ctx, argv[1], REDISMODULE_READ | REDISMODULE_WRITE);
+	int		ty = RedisModule_KeyType(key);
 	/* The case where the lock is already held. */
-	if (RedisModule_CallReplyType(reply) == REDISMODULE_REPLY_NULL) {
-		RedisModule_FreeCallReply(reply);
+	if (ty != REDISMODULE_KEYTYPE_EMPTY) {
 		return RedisModule_ReplyWithNull(ctx);
 	}
-	RedisModule_FreeCallReply(reply);
+	long long	exp;
+	if (RedisModule_StringToLongLong(argv[2], &exp) == REDISMODULE_ERR) {
+		return RedisModule_ReplyWithError(ctx, REDISMODULE_ERRORMSG_WRONGTYPE);
+	}
+	RedisModuleString *v = RedisModule_CreateStringFromLongLong(ctx, value);
+	RedisModule_StringSet(key, v);
+	RedisModule_SetExpire(key, exp * MILLIS);
 
 	/* Track our current secret for any release invocations. */
 	curValue = value;
@@ -37,6 +47,8 @@ Release_RedisCommand(RedisModuleCtx * ctx, RedisModuleString ** argv, int argc)
 	if (argc != 3) {
 		return RedisModule_WrongArity(ctx);
 	}
+	RedisModule_AutoMemory(ctx);
+
 	long long	value;
 	if (RedisModule_StringToLongLong(argv[2], &value) == REDISMODULE_ERR) {
 		return RedisModule_ReplyWithError(ctx, REDISMODULE_ERRORMSG_WRONGTYPE);
@@ -47,10 +59,15 @@ Release_RedisCommand(RedisModuleCtx * ctx, RedisModuleString ** argv, int argc)
 	/*
 	 * The caller supplied the correct random value, so delete the key.
 	 */
-	RedisModuleCallReply *reply = RedisModule_Call(ctx, "DEL", "s", argv[1]);
-	RedisModule_ReplyWithCallReply(ctx, reply);
-	RedisModule_FreeCallReply(reply);
-	return REDISMODULE_OK;
+	RedisModuleKey *key = RedisModule_OpenKey(ctx, argv[1], REDISMODULE_WRITE);
+	int		ty = RedisModule_KeyType(key);
+	if (ty == REDISMODULE_KEYTYPE_EMPTY) {
+		return RedisModule_ReplyWithError(ctx, "ERR lock not found");
+	} else if (ty != REDISMODULE_KEYTYPE_STRING) {
+		return RedisModule_ReplyWithError(ctx, REDISMODULE_ERRORMSG_WRONGTYPE);
+	}
+	RedisModule_DeleteKey(key);
+	return RedisModule_ReplyWithSimpleString(ctx, "OK");
 }
 
 int
@@ -58,6 +75,7 @@ RedisModule_OnLoad(RedisModuleCtx * ctx, RedisModuleString ** argv, int argc)
 {
 	REDISMODULE_NOT_USED(argv);
 	REDISMODULE_NOT_USED(argc);
+	srand(time(NULL));
 
 	if (RedisModule_Init(ctx, "fencelock", 1, REDISMODULE_APIVER_1) == REDISMODULE_ERR) {
 		return REDISMODULE_ERR;
