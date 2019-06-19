@@ -27,5 +27,6 @@ def test_acquire_release(redis_conn):
     assert release_response == b'OK'
 
 def test_incorrect_type(redis_conn):
-    resp = redis_conn.execute_command('FENCELOCK.ACQUIRE d d')
-    assert resp == b'ERR: WRONGTYPE Operation against a key holding the wrong kind of value'
+    with pytest.raises(redis.exceptions.ResponseError) as resp:
+        redis_conn.execute_command('FENCELOCK.ACQUIRE d d')
+        assert resp.value.message == b'ERR: WRONGTYPE Operation against a key holding the wrong kind of value'
