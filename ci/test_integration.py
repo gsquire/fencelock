@@ -25,3 +25,7 @@ def test_acquire_release(redis_conn):
     assert len(lock) == 2
     release_response = redis_conn.execute_command('FENCELOCK.RELEASE c {0}'.format(lock[0]))
     assert release_response == b'OK'
+
+def test_incorrect_type(redis_conn):
+    resp = redis_conn.execute_command('FENCELOCK.ACQUIRE d d')
+    assert resp = b'ERR: WRONGTYPE Operation against a key holding the wrong kind of value'
