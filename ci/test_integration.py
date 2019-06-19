@@ -28,4 +28,4 @@ def test_acquire_release(redis_conn):
 
 def test_incorrect_type(redis_conn):
     resp = redis_conn.execute_command('FENCELOCK.ACQUIRE d d')
-    assert resp = b'ERR: WRONGTYPE Operation against a key holding the wrong kind of value'
+    assert resp == b'ERR: WRONGTYPE Operation against a key holding the wrong kind of value'
