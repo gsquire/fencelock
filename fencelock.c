@@ -25,13 +25,13 @@ Acquire_RedisCommand(RedisModuleCtx * ctx, RedisModuleString ** argv, int argc)
 	if (ty != REDISMODULE_KEYTYPE_EMPTY) {
 		return RedisModule_ReplyWithNull(ctx);
 	}
-	long long	exp;
-	if (RedisModule_StringToLongLong(argv[2], &exp) == REDISMODULE_ERR) {
+	long long	expire;
+	if (RedisModule_StringToLongLong(argv[2], &expire) == REDISMODULE_ERR) {
 		return RedisModule_ReplyWithError(ctx, REDISMODULE_ERRORMSG_WRONGTYPE);
 	}
 	RedisModuleString *v = RedisModule_CreateStringFromLongLong(ctx, value);
 	RedisModule_StringSet(key, v);
-	RedisModule_SetExpire(key, exp * MILLIS);
+	RedisModule_SetExpire(key, expire * MILLIS);
 
 	/* Track our current secret for any release invocations. */
 	curValue = value;
